@@ -1,0 +1,75 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+
+def Poten(x):
+	if x>-10 and x<10:
+		return 0
+	else: return 100000
+	
+a = 20.0
+m = 938.27
+hbarc = 197.33
+
+E= [0.512,2.0479,4.6078,8.1917,12.7995]
+M=[]
+psi01 = 0
+psi02 = 0
+psiD01 = 0.01
+psiD02 = 0.01
+
+def f1(x,z,psi):
+	return z
+
+def f2(x,z,psi,q):
+	C = generateC(x,q)
+	return C*psi
+	
+def generateC(x,q):
+	num = 2*m
+	den = math.pow(hbarc,2)
+	frac =num/den
+	frac = frac* (Poten(x)-E[q])
+	return frac
+	
+def rk42(f1,f2,psi01,psiD01,q,x0=-10.0,xn=10.0,n=1000.0):
+	h = float(xn-x0)/float(n)
+	x = np.arange(x0,xn+h,h)
+	psiArr = [psi01]
+	z = [psiD01]
+	for i in range(n):
+		k11 = h*f1(x[i],z[i],psiArr[i])
+		k21 = h*f2(x[i],z[i],psiArr[i],q)
+		k12 = h*f1(x[i]+(h/2.0),z[i],psiArr[i]+(k11/2.0))
+		k22 = h*f2(x[i]+(h/2.0),z[i],psiArr[i]+(k21/2.0),q)
+		k13 = h*f1(x[i]+(h/2.0),z[i],psiArr[i]+(k12/2.0))
+		k23 = h*f2(x[i]+(h/2.0),z[i],psiArr[i]+(k22/2.0),q)
+		k14 = h*f1(x[i]+h,z[i],psiArr[i]+k13)
+		k24 = h*f2(x[i]+h,z[i],psiArr[i]+k23,q)
+		z.append(z[i] +  (k21/6.0) + (k22/3.0) + (k23/3.0) + (k24/6.0))
+		psiArr.append(psiArr[i] + (k11/6.0) + (k12/3.0) + (k13/3.0) + (k14/6.0))
+	return psiArr
+	
+x0 = -10.0
+xn = 10.0
+n= 1000.0
+step = float(xn-x0)/float(n)
+xArray =  np.arange(x0,xn+step,step)
+
+for i in range(5):
+	M.append(rk42(f1,f2,psi01,psiD01,i,x0,xn,n))		
+	plt.plot(xArray,M[i])
+'''
+psi = rk42(f1,f2,psi01,psiD01,x0,xn,n)
+plt.plot(xArray,psi)
+'''
+plt.show()
+
+
+
+
+
+
+
+
+
